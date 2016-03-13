@@ -1,0 +1,59 @@
+<html>
+<head>
+<title>Scaled Iframes</title>
+<style>
+  body { margin: 0; padding: 0; }
+  iframe { border: none; }
+</style>
+</head>
+<body>
+<script>
+  var theFrames = {
+    iframes: ["http://www.kespry.com", "http://leafletjs.com/reference.html", "http://knowingneurons.com/2016/03/10/dopamine-makes-people-impulsive/", "https://www.embeddedrelated.com/showarticle/195.php?1", "http://jvns.ca/blog/2016/03/12/how-does-perf-work-and-some-questions/", "http://threejs.org/examples/webgl_geometries2.html", "http://threejs.org/examples/webgl_effects_anaglyph.html"],
+    size: {
+      thumbnail: { x: 320,  y: 240 },
+      viewport:  { x: 1280, y: 1024 },
+    },
+    _makeFrames: function() {
+      return function(url) {
+        var iframe = document.createElement('iframe');
+
+        with(this.size) {
+          iframe.width = thumbnail.x;
+          iframe.height = thumbnail.y;
+
+          var scale  = [thumbnail.x / viewport.x, thumbnail.y / viewport.y];
+        }
+        iframe.onload = (function(size, url) {
+          return function() {
+            var remoteSite = document.createElement('iframe');
+            remoteSite.width = size.x;
+            remoteSite.height = size.y;
+            this.contentWindow.document.body.appendChild(remoteSite);
+            remoteSite.src = url;
+
+            remoteSite.onload = function() {
+              remoteSite.style.transform = "scale(" + scale.join(", ") + ")";
+              remoteSite.style.transformOrigin = "0 0 0";
+              remoteSite.style.border = "none";
+
+              document.body.style.padding = "0 px";
+              document.body.style.margin = "0 px";
+            }
+          }
+        })(this.size.viewport, url);
+
+        iframe.src = 'javascript://';
+        document.body.appendChild(iframe);
+
+        return iframe;
+      }.bind(this);
+    },
+    run: function() {
+      this._iframes = this.iframes.forEach(this._makeFrames.bind(this)());
+      return this;
+    }
+  }.run();
+</script>
+</body>
+</html>
